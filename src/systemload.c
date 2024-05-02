@@ -10,41 +10,32 @@
 #define MAX_CPUS 128
 
 int main() {
-    FILE *file;
+    FILE *loadavg_file, *cpuinfo_file;
     double loadavg[3];
-    int num_cpus;
-    char line[MAX_CPUS];
+    int num_cpus = 0;
+    char cpuinfo_line[128], output[256];
+
 // primero tomamos los promedios de loadavg
-    file = fopen("/proc/loadavg", "r");
-    if (file == NULL) {
+    loadavg_file = fopen("/proc/loadavg", "r");
+    cpuinfo_file = fopen("/proc/cpuinfo", "r");
+
+    if (loadavg_file == NULL || cpuinfo_file == NULL) {
         perror("Error opening file");
         return 1;
     }
+    fscanf(loadavg_file, "%lf %lf %lf", &loadavg[0], &loadavg[1], &loadavg[2]);
 
-    fscanf(file, "%lf %lf %lf", &loadavg[0], &loadavg[1], &loadavg[2]);
-    fclose(file);
 // y la cantidad de cores de cpuinfo.
-// ..y luego hacemos mucha matematica :V
-
-    file = fopen("/proc/cpuinfo", "r");
-    if (file == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
-
-    num_cpus = 0;
-    while (fgets(line, MAX_CPUS, file) != NULL) {
-        if (strstr(line, "processor") != NULL) {
+// ... y luego hacemos mucha matematica :V
+    while (fgets(cpuinfo_line, sizeof(cpuinfo_line), cpuinfo_file) != NULL) {
+        if (strncmp(cpuinfo_line, "processor", 9) == 0) {
             num_cpus++;
         }
-    }
-    fclose(file);
+    };
 
-    printf("System Load\n");
-    printf("Actual: %.2f\n", loadavg[0]);
-    printf("5 Minutes Ago: %.2f\n", loadavg[1]);
-    printf("15 Minutes Ago: %.2f\n", loadavg[2]);
-    printf("Using %.2f%% of the %d available cores\n", (loadavg[0] / num_cpus) * 100, num_cpus);
+    sprintf(output, "System Load\nActual: %.2f\n5 Minutes Ago: %.2f\n15 Minutes Ago: %.2f\nUsing %.2f%% of the %d available cores\n",
+            loadavg[0], loadavg[1], loadavg[2], (loadavg[0] / num_cpus) * 100, num_cpus);
+    printf("%s", output);
 
     return 0;
 }
