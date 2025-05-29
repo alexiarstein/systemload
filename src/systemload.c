@@ -1,5 +1,5 @@
 // SIMPLE SYSTEM LOAD FOR HUMANS
-// AUTHOR: Alexia Michelle <alexiarstein@aol.com>
+// AUTHOR: Alexia Michelle <lex@goldendoglinux.org>
 // LICENSE: GNU GPL 3.0
 // Repository https://github.com/alexiarstein/systemload
 
